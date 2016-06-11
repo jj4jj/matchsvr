@@ -1,0 +1,62 @@
+
+import "extensions.proto";
+
+//////////////////////////////////////////////////
+enum MatchingConstValues {
+	option allow_alias = true;
+	MATCHING_TEAM_MAX_MEMBER_NUM = 3;
+	MATCHING_TEAM_MAX_WAITING_MERGING_MEMBER_NUM = 2;
+	MATCHING_TEAM_MAX_NUM_IN_LEVEL = 10000;
+	MACTCHING_QUEUE_MAX_LEVEL_NUM = 26;
+	MACTCHING_QUEUE_MAX_LEVEL = 25;
+	MACTCHING_QUEUE_MAX_MACTCHED_RESULT_NUM = 10000;
+	MATCHED_RESULT_TEAM_NUM = 2;
+	MATCHED_RESULT_TEAM_L = 0;
+	MATCHED_RESULT_TEAM_R = 1;
+	MACTCHING_BUCKET_MAX_WAITING_TEAM_NUM = 1000;
+	MATCHING_QUEUE_MAX_OBJECT_NUM = 500000;
+};
+message MatchingPoint {
+	required	uint32	elo = 1;
+	optional	uint32	level = 2;
+};	
+message MatchingObject {
+	option(m_pks) = "id";	
+	required	uint64			id = 1;
+	required	MatchingPoint	point = 2;
+};
+message MatchingTeam {
+	repeated	uint64	members = 1[(f_count)="MATCHING_TEAM_MAX_MEMBER_NUM"];
+	required	uint32	join_time = 2;
+	required	MatchingPoint	point = 3;
+};
+message MatchedResult {
+	repeated	uint64	teams = 1[(f_count)="MATCHING_TEAM_MAX_MEMBER_NUM"];
+};
+message MatchingQueueMatcher {
+	option(m_pks) = "team_elo,id";
+	required	uint32	team_elo = 1;
+	required	uint32	team_id = 2;
+};
+message MatchingWaitigTeam {
+	repeated	MatchingQueueMatcher	teams = 1[(f_count)="MACTCHING_BUCKET_MAX_WAITING_TEAM_NUM"];
+};
+message MatchingBucket {	
+	repeated	MatchingWaitigTeam	waitings = 1[(f_count)="MATCHING_TEAM_MAX_WAITING_MERGING_MEMBER_NUM"];
+	repeated	MatchingQueueMatcher	matchers = 2[(f_count)="MATCHING_TEAM_MAX_NUM_IN_LEVEL"];	
+};
+message MatchingQueue {
+	required	uint32	team_member_num = 1;
+	repeated	MatchingBucket	buckets = 2[(f_count)="MACTCHING_QUEUE_MAX_LEVEL_NUM"];
+	required	uint32	cur_time = 3;
+	required	uint32	cur_ms_insec = 4;
+	repeated	MatchedResult	results = 5[(f_count)="MACTCHING_QUEUE_MAX_MACTCHED_RESULT_NUM"];
+};
+
+message Matching {
+	optional MatchingQueue q = 1;
+	optional MatchingTeam  mt = 2;
+	optional MatchingObject mo = 3;
+}
+
+
