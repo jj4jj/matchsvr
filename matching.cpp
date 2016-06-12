@@ -5,6 +5,8 @@
 #include "matching.cex.hpp"
 #include "matching.h"
 
+#define GLOG_DBG(...)   do{}while(false)
+
 struct MatchingObjectHash {
     size_t operator ()(const MatchingObject_ST & mo) {
         return mo.id;
@@ -148,7 +150,7 @@ static inline bool _check_result_matched(uint32_t cur_time, MatchingQueueMatcher
     int lv_diff = llv - rlv;
     if (lv_diff < 0){ lv_diff = -lv_diff; }
     if (wait_time >= lv_diff * 15){
-        printf("check result matched success -> lv diff:%d wait min time:%d [%u: %u %u in time %u]<->[%u: %u %u in time %u]\n",
+        GLOG_DBG("check result matched success -> lv diff:%d wait min time:%d [%u: %u %u in time %u]<->[%u: %u %u in time %u]\n",
             lv_diff, wait_time,
             results[MATCHED_RESULT_TEAM_L].team_id, lt->point.elo, llv, cur_time - lt->join_time,
             results[MATCHED_RESULT_TEAM_R].team_id, rt->point.elo, rlv, cur_time - rt->join_time);
@@ -196,7 +198,7 @@ static inline void _check_merge_team(MatchingPoolImpl * impl_){
                 }
                 //found one
                 if (merged.members.count == MQ.team_member_num){
-                    printf("found one merge matching team with %zu teams [%u]\n",
+                    GLOG_DBG("found one merge matching team with %zu teams [%u]\n",
                         merged_buckets_num, merged.point.elo);
                     MatchingBucket_ST & merge_bucket = MQ.buckets[merged.point.level];
                     if (merge_bucket.matchers.count >= MATCHING_TEAM_MAX_NUM_IN_LEVEL){
@@ -209,7 +211,7 @@ static inline void _check_merge_team(MatchingPoolImpl * impl_){
                     nmqst.construct();
                     nmqst.team_elo = merged.point.elo;
                     MatchingTeam_ST * nmerging_team = NULL;
-                    printf("clear merged %zu teams\n", merged_buckets_num);
+                    GLOG_DBG("clear merged %zu teams\n", merged_buckets_num);
                     //clear merged
                     for (size_t x = 0; x < merged_buckets_num; ++x){
                         MatchingBucket_ST & clear_bucket = MQ.buckets[merged_bucket_idxs[x].level];
@@ -232,15 +234,15 @@ static inline void _check_merge_team(MatchingPoolImpl * impl_){
                                 s_ENV.member_id_2_team_id[clear_team->members[x]] = nmqst.team_id;
                             }
                             //free team, update team id ?
-                            printf("free no:%d team:%zu\n", __LINE__, clear_team_id);
+                            GLOG_DBG("free no:%d team:%zu\n", __LINE__, clear_team_id);
                             s_ENV.matching_team_pool.free(clear_team_id);
                         }
                         //here no idx change when removing for pos idx is reversed
                         //when in same nidx (member num) , it's safe
-                        printf("before remove waiting queue x=%zu [wq count=%u]\n", x,
+                        GLOG_DBG("before remove waiting queue x=%zu [wq count=%u]\n", x,
                             clear_wq.teams.count);
                         clear_wq.teams.lremove(merged_bucket_idxs[x].pos_idx);
-                        printf("after remove waiting queue x=%zu "
+                        GLOG_DBG("after remove waiting queue x=%zu "
                             "level=%u num=%u pos=%u [wq count=%u]\n", x,
                             merged_bucket_idxs[x].level,
                             merged_bucket_idxs[x].num_idx + 1,
@@ -285,22 +287,22 @@ int     MatchingPool::join(const std::vector<uint64_t> & members){
     mqst.team_elo = mt.point.elo;
     mqst.team_id = mtid;
 
-    printf("join matching team %zu#%u [%u %u] (", mtid,  mt.members.count, matching_lv, mt.point.elo);
+    GLOG_DBG("join matching team %zu#%u [%u %u] (", mtid,  mt.members.count, matching_lv, mt.point.elo);
     for (size_t x = 0; x < mt.members.count; ++x){
-        printf("%lu,", mt.members[x]);
+        GLOG_DBG("%lu,", mt.members[x]);
     }
-    printf(")\n");
+    GLOG_DBG(")\n");
 
 
     if (mt.members.count == MQ.team_member_num){
         //insert into matchers
         if (bucket.matchers.count >= MATCHING_TEAM_MAX_NUM_IN_LEVEL){
-            printf("free no:%d team:%zu\n", __LINE__, mtid);
+            GLOG_DBG("free no:%d team:%zu\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -3;
         }
         if (bucket.matchers.binsert(mqst)){
-            printf("free no:%d team:%zu\n", __LINE__, mtid);
+            GLOG_DBG("free no:%d team:%zu\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -4;
         }
@@ -310,12 +312,12 @@ int     MatchingPool::join(const std::vector<uint64_t> & members){
     }
     else {//waiting merging
         if (bucket.waitings[mt.members.count - 1].teams.count == MACTCHING_BUCKET_MAX_WAITING_TEAM_NUM){
-            printf("free no:%d team:%zu\n", __LINE__, mtid);
+            GLOG_DBG("free no:%d team:%zu\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -5; //waiting queue is also full
         }
         if (bucket.waitings[mt.members.count - 1].teams.binsert(mqst)){
-            printf("free no:%d team:%zu\n", __LINE__, mtid);
+            GLOG_DBG("free no:%d team:%zu\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -6;
         }
@@ -328,7 +330,7 @@ int     MatchingPool::join(const std::vector<uint64_t> & members){
 }
 static inline void _free_team(size_t team_id){
     MatchingTeam_ST * team = s_ENV.matching_team_pool.ptr(team_id);
-    printf("free no:%d team:%zu ptr:%p\n", __LINE__, team_id, team);
+    GLOG_DBG("free no:%d team:%zu ptr:%p\n", __LINE__, team_id, team);
     for (size_t k = 0; k < team->members.count; ++k){
         s_ENV.member_id_2_team_id.erase(team->members[k]);
     }
@@ -339,7 +341,7 @@ const MatchingTeam_ST *  MatchingPool::get_team(size_t team_id){
 }
 void                 MatchingPool::free_team(const MatchingTeam_ST * team){
     size_t team_id = s_ENV.matching_team_pool.id((MatchingTeam_ST *)team);
-    printf("free no:%d team:%zu\n", __LINE__, team_id);
+    GLOG_DBG("free no:%d team:%zu\n", __LINE__, team_id);
     assert(team_id > 0);
     _free_team(team_id);
 }
@@ -405,7 +407,7 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
             result.teams[MATCHED_RESULT_TEAM_L] = bucket.matchers[j].team_id;
             result.teams[MATCHED_RESULT_TEAM_R] = bucket.matchers[j - 1].team_id;
 
-            printf("same level:%d num:%u matched : [%u:%u] <-> [%u:%u]\n", i,
+            GLOG_DBG("same level:%d num:%u matched : [%u:%u] <-> [%u:%u]\n", i,
                 bucket.matchers.count,
                 bucket.matchers[j].team_id, bucket.matchers[j].team_elo,
                 bucket.matchers[j - 1].team_id, bucket.matchers[j - 1].team_elo);
@@ -440,7 +442,7 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
                     --result_avail;
                     matching = false;
                     //
-                    printf("span level diff:%d matched : [%u:%u] <-> [%u:%u]\n", i - left_level,
+                    GLOG_DBG("span level diff:%d matched : [%u:%u] <-> [%u:%u]\n", i - left_level,
                         result_teams[MATCHED_RESULT_TEAM_L].team_id, result_teams[MATCHED_RESULT_TEAM_L].team_elo,
                         result_teams[MATCHED_RESULT_TEAM_R].team_id, result_teams[MATCHED_RESULT_TEAM_R].team_elo);
                     
@@ -456,7 +458,7 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
 
                     assert(bucket.matchers.count == 1);
                     --bucket.matchers.count;
-                    printf("found span pair ok , then find next pair ...\n");
+                    GLOG_DBG("found span pair ok , then find next pair ...\n");
                     //find next left
                     i = left_level;
                     left_level = -1;
@@ -501,7 +503,7 @@ void                     MatchingPool::clear_fetched_results(){
             (MQ.results.count - MQ.fetched_results)*sizeof(MQ.results.list[0]));
     }
     MQ.results.count -= MQ.fetched_results;
-    printf("clear result num:%u rest:%u\n", MQ.fetched_results, MQ.results.count);
+    GLOG_DBG("clear result num:%u rest:%u\n", MQ.fetched_results, MQ.results.count);
     MQ.fetched_results = 0;
 }
 
