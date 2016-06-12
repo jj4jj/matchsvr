@@ -14,7 +14,7 @@ struct MatchingPool {
     void                        free_team(const MatchingTeam_ST * team);
     const MatchingTeam_ST *     get_team(size_t team_id);
 
-    const MatchedResult_ST * fetch_results(int * result_num);
+    const MatchedResult_ST * fetch_results(size_t * result_num);
     void                     clear_fetched_results();
 public:
     static  int   update_matching_object(uint64_t id, int elo, int lv);

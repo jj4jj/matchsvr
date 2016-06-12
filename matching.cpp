@@ -271,6 +271,7 @@ int     MatchingPool::join(const std::vector<uint64_t> & members){
     if (!mtid){
         return -2;
     }
+    assert(s_ENV.matching_team_pool.ptr(mtid));
     *s_ENV.matching_team_pool.ptr(mtid) = mt;
 
     int matching_lv = mt.point.level;
@@ -324,10 +325,10 @@ int     MatchingPool::join(const std::vector<uint64_t> & members){
 }
 static inline void _free_team(size_t team_id){
     MatchingTeam_ST * team = s_ENV.matching_team_pool.ptr(team_id);
+    printf("free no:%d team:%zu ptr:%p\n", __LINE__, team_id, team);
     for (size_t k = 0; k < team->members.count; ++k){
         s_ENV.member_id_2_team_id.erase(team->members[k]);
     }
-    printf("free no:%d team:%zu\n", __LINE__, team_id);
     s_ENV.matching_team_pool.free(team_id);
 }
 const MatchingTeam_ST *  MatchingPool::get_team(size_t team_id){
@@ -335,6 +336,7 @@ const MatchingTeam_ST *  MatchingPool::get_team(size_t team_id){
 }
 void                 MatchingPool::free_team(const MatchingTeam_ST * team){
     size_t team_id = s_ENV.matching_team_pool.id((MatchingTeam_ST *)team);
+    printf("free no:%d team:%zu\n", __LINE__, team_id);
     assert(team_id > 0);
     _free_team(team_id);
 }
@@ -391,19 +393,20 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
     //matching
     int result_avail = MACTCHING_QUEUE_MAX_MACTCHED_RESULT_NUM - MQ.results.count;
     int checked_num = 0;
+    MatchedResult_ST result;
+    result.construct();
+    result.teams.count = MATCHED_RESULT_TEAM_NUM;
     for (int i = 0; i <= MACTCHING_QUEUE_MAX_LEVEL; ++i){
         MatchingBucket_ST &    bucket = MQ.buckets[i];
-        MatchedResult_ST *     result = &MQ.results.list[MQ.results.count];
-        result->teams.count = MATCHED_RESULT_TEAM_NUM;
         for (int j = bucket.matchers.count - 1; j >= 1 && result_avail > 0; j -= 2){
-            result->teams[MATCHED_RESULT_TEAM_L] = bucket.matchers[j].team_id;
-            result->teams[MATCHED_RESULT_TEAM_R] = bucket.matchers[j - 1].team_id;
+            result.teams[MATCHED_RESULT_TEAM_L] = bucket.matchers[j].team_id;
+            result.teams[MATCHED_RESULT_TEAM_R] = bucket.matchers[j - 1].team_id;
             printf("same level:%d num:%u matched : [%u:%u] <-> [%u:%u]\n", i,
                 bucket.matchers.count,
                 bucket.matchers[j].team_id, bucket.matchers[j].team_elo,
                 bucket.matchers[j - 1].team_id, bucket.matchers[j - 1].team_elo);
 
-            ++MQ.results.count;
+            MQ.results.lappend(result);
             --result_avail;
             ++checked_num;
             bucket.matchers.count -= 2;
@@ -417,22 +420,24 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
     int  left_level = -1;
     MatchingQueueMatcher_ST result_teams[MATCHED_RESULT_TEAM_NUM];
     memset(&result_teams, 0, sizeof(result_teams));
+    result.teams[MATCHED_RESULT_TEAM_L] = 0;
+    result.teams[MATCHED_RESULT_TEAM_R] = 0;
     for (int i = MACTCHING_QUEUE_MAX_LEVEL; i >= 0; --i){
         MatchingBucket_ST &    bucket = MQ.buckets[i];
-        MatchedResult_ST *     result = &MQ.results.list[MQ.results.count];
-        result->teams.count = MATCHED_RESULT_TEAM_NUM;
         if (bucket.matchers.count > 0 && result_avail > 0 && checked_num < max_checked_num){
             assert(bucket.matchers[0].team_id);
             if (matching){ //
                 //checking
                 result_teams[MATCHED_RESULT_TEAM_R] = bucket.matchers[0];
                 if (_check_result_matched(MQ.cur_time, result_teams)){
-                    result->teams[MATCHED_RESULT_TEAM_L] = result_teams[MATCHED_RESULT_TEAM_L].team_id;
-                    result->teams[MATCHED_RESULT_TEAM_R] = result_teams[MATCHED_RESULT_TEAM_R].team_id;
-                    ++MQ.results.count;
-
+                    result.teams[MATCHED_RESULT_TEAM_L] = result_teams[MATCHED_RESULT_TEAM_L].team_id;
+                    result.teams[MATCHED_RESULT_TEAM_R] = result_teams[MATCHED_RESULT_TEAM_R].team_id;
+                    MQ.results.lappend(result);
                     --result_avail;
                     matching = false;
+                    result.teams[MATCHED_RESULT_TEAM_L] = 0;
+                    result.teams[MATCHED_RESULT_TEAM_R] = 0;
+                    memset(&result_teams, 0, sizeof(result_teams));
 
                     printf("span level diff:%d matched : [%u:%u] <-> [%u:%u]\n", i - left_level,
                         result_teams[MATCHED_RESULT_TEAM_L].team_id, result_teams[MATCHED_RESULT_TEAM_L].team_elo,
@@ -460,33 +465,37 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
     }
     return checked_num;
 }
-const MatchedResult_ST * MatchingPool::fetch_results(int * result_num){
+const MatchedResult_ST * MatchingPool::fetch_results(size_t * result_num){
     assert(result_num );
-    if (*result_num <= 0){
+    if (*result_num == 0){
         return NULL;
     }
+    //*result_num = MQ.results.count;
     assert(MQ.results.count >= MQ.fetched_results);
-    if (*result_num + MQ.fetched_results > MQ.results.count){//cut
+    MatchedResult_ST * p = MQ.results.list + MQ.fetched_results;
+    if (*result_num > (MQ.results.count - MQ.fetched_results)){//cut
         *result_num = MQ.results.count - MQ.fetched_results;
     }
-    MatchedResult_ST * p = MQ.results.list + MQ.fetched_results;
     MQ.fetched_results += *result_num;
     return p;
 }
 void                     MatchingPool::clear_fetched_results(){
+    if (MQ.fetched_results == 0){
+        return;
+    }
+    assert(MQ.results.count >= MQ.fetched_results);
     for (uint32_t i = 0; i < MQ.fetched_results; ++i){
         for (int j = 0; j < MATCHED_RESULT_TEAM_NUM; ++j){
             _free_team(MQ.results[i].teams[j]);
         }
     }
+    //
     if (MQ.results.count > MQ.fetched_results){
         memmove(MQ.results.list, MQ.results.list + MQ.fetched_results,
             (MQ.results.count - MQ.fetched_results)*sizeof(MQ.results.list[0]));
-        MQ.results.count -= MQ.fetched_results;
     }
-    else {
-        MQ.results.count = 0;
-    }
+    MQ.results.count -= MQ.fetched_results;
+    printf("clear result num:%u rest:%u\n", MQ.fetched_results, MQ.results.count);
     MQ.fetched_results = 0;
 }
 

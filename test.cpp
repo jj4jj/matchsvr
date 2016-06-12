@@ -46,13 +46,19 @@ int main(){
 
         mq.update(rand() % 100, rand() % 100);
         if (i % 5 == 0){
-            int n = rand() % 20;
+            size_t n = rand() % 20;            
             const MatchedResult_ST * r = mq.fetch_results(&n);
-            for (int j = 0; j < n; ++j){
+            printf("fetched result num:%zu\n", n);
+            for (size_t j = 0; j < n; ++j){
+                printf("process result pair ! %zu <-> %zu\n", 
+                    r[j].teams[0],
+                    r[j].teams[1]);
                 const MatchingTeam_ST * lt = mq.get_team(r[j].teams[0]);
                 const MatchingTeam_ST * rt = mq.get_team(r[j].teams[1]);
-                printf("Got an pair ! [%d\t%d\tin\t%d]  <->  [%d\t%d\tin\t%d] \n",
+                printf("process result pair ! %zu#[%d\t%d\tin\t%d]  <->  %zu#[%d\t%d\tin\t%d] \n",
+                    r[j].teams[0],
                     lt->point.elo, lt->point.level, mq.time() - lt->join_time,
+                    r[j].teams[1],
                     rt->point.elo, rt->point.level, mq.time() - rt->join_time);
             }
             mq.clear_fetched_results();
