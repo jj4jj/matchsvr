@@ -17,11 +17,12 @@ enum MatchingConstValues {
 	MATCHING_QUEUE_MAX_OBJECT_NUM = 500000;
 };
 message MatchingPoint {
+	option(m_pks) = "level,elo";
 	required	uint32	elo = 1;
 	optional	uint32	level = 2;
-};	
+};
 message MatchingObject {
-	option(m_pks) = "id";	
+	option(m_pks) = "id";
 	required	uint64			id = 1;
 	required	MatchingPoint	point = 2;
 };
@@ -34,7 +35,7 @@ message MatchedResult {
 	repeated	uint64	teams = 1[(f_count)="MATCHED_RESULT_TEAM_NUM"];
 };
 message MatchingQueueMatcher {
-	option(m_pks) = "team_elo,id";
+	option(m_pks) = "team_elo,team_id";
 	required	uint32	team_elo = 1;
 	required	uint32	team_id = 2;
 };

@@ -7,15 +7,10 @@
 
 #define GLOG_DBG(...)   do{}while(false)
 
-struct MatchingObjectHash {
-    size_t operator ()(const MatchingObject_ST & mo) {
-        return mo.id;
-    }
-};
 static struct MatchingEnv {
     pbdcex::mmpool_t<MatchingTeam_ST, MATCHING_QUEUE_MAX_OBJECT_NUM>
         matching_team_pool;
-    pbdcex::hashtable_t<MatchingObject_ST, MATCHING_QUEUE_MAX_OBJECT_NUM, MatchingObjectHash>
+    pbdcex::hashtable_t<MatchingObject_ST, MATCHING_QUEUE_MAX_OBJECT_NUM>
         matching_object_pool;
     int     inited;
     std::unordered_map<uint64_t, size_t>    member_id_2_team_id;

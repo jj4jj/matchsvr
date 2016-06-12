@@ -11,6 +11,6 @@ clean:
 	rm -f ./matching.cex.hpp
 	rm -f ./matching.pb.h
 
-test: ./matching.cpp ./test.cpp ./pbdcex.core.hpp
+test: ./matching.cpp ./test.cpp
 	g++ $^ -o $@ -g3 --std=c++11 -Wall
 
