@@ -175,18 +175,22 @@ struct array_t {
     int  compare(const array_t & rhs) const {
         int ret = 0;
         if (count < rhs.count){
-            for (int i = 0; i < count; ++i){
-                ret = list[i].compare(rhs.list[i]);
-                if (ret){
-                    return ret;
+            for (LengthT i = 0; i < count; ++i){
+                if (list[i] < rhs.list[i]){
+                    return -1;
+                }
+                else if (!(list[i] == rhs.list[i])){
+                    return 1;
                 }
             }
         }
         else {
-            for (int i = 0; i < rhs.count; ++i){
-                ret = list[i].compare(rhs.list[i]);
-                if (ret){
-                    return ret;
+            for (LengthT i = 0; i < rhs.count; ++i){
+                if (list[i] < rhs.list[i]){
+                    return -1;
+                }
+                else if (!(list[i] == rhs.list[i])){
+                    return 1;
                 }
             }
         }
@@ -225,7 +229,7 @@ struct array_t {
         }
         if (swap_remove){
             list[idx] = list[cmax - 1];
-            list[cmax - 1].construct();
+            //list[cmax - 1].construct();
         }
         else {
             memmove(list + idx, list + idx + 1, count - idx - 1);

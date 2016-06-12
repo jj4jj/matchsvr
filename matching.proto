@@ -51,6 +51,7 @@ message MatchingQueue {
 	required	uint32	cur_time = 3;
 	required	uint32	cur_ms_insec = 4;
 	repeated	MatchedResult	results = 5[(f_count)="MACTCHING_QUEUE_MAX_MACTCHED_RESULT_NUM"];
+	optional	uint32	fetched_results = 6;
 };
 
 message Matching {

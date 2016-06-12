@@ -168,12 +168,13 @@ void protobuf_AssignDesc_matching_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(MatchingBucket));
   MatchingQueue_descriptor_ = file->message_type(7);
-  static const int MatchingQueue_offsets_[5] = {
+  static const int MatchingQueue_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MatchingQueue, team_member_num_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MatchingQueue, buckets_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MatchingQueue, cur_time_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MatchingQueue, cur_ms_insec_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MatchingQueue, results_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MatchingQueue, fetched_results_),
   };
   MatchingQueue_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -284,26 +285,26 @@ void protobuf_AddDesc_matching_2eproto() {
     "itigTeamB0\222\265\030,MATCHING_TEAM_MAX_WAITING_"
     "MERGING_MEMBER_NUM\022K\n\010matchers\030\002 \003(\0132\025.M"
     "atchingQueueMatcherB\"\222\265\030\036MATCHING_TEAM_M"
-    "AX_NUM_IN_LEVEL\"\343\001\n\rMatchingQueue\022\027\n\017tea"
+    "AX_NUM_IN_LEVEL\"\374\001\n\rMatchingQueue\022\027\n\017tea"
     "m_member_num\030\001 \002(\r\022C\n\007buckets\030\002 \003(\0132\017.Ma"
     "tchingBucketB!\222\265\030\035MACTCHING_QUEUE_MAX_LE"
     "VEL_NUM\022\020\n\010cur_time\030\003 \002(\r\022\024\n\014cur_ms_inse"
     "c\030\004 \002(\r\022L\n\007results\030\005 \003(\0132\016.MatchedResult"
     "B+\222\265\030\'MACTCHING_QUEUE_MAX_MACTCHED_RESUL"
-    "T_NUM\"]\n\010Matching\022\031\n\001q\030\001 \001(\0132\016.MatchingQ"
-    "ueue\022\031\n\002mt\030\002 \001(\0132\r.MatchingTeam\022\033\n\002mo\030\003 "
-    "\001(\0132\017.MatchingObject*\246\003\n\023MatchingConstVa"
-    "lues\022 \n\034MATCHING_TEAM_MAX_MEMBER_NUM\020\003\0220"
-    "\n,MATCHING_TEAM_MAX_WAITING_MERGING_MEMB"
-    "ER_NUM\020\002\022#\n\036MATCHING_TEAM_MAX_NUM_IN_LEV"
-    "EL\020\220N\022!\n\035MACTCHING_QUEUE_MAX_LEVEL_NUM\020\032"
-    "\022\035\n\031MACTCHING_QUEUE_MAX_LEVEL\020\031\022,\n\'MACTC"
-    "HING_QUEUE_MAX_MACTCHED_RESULT_NUM\020\220N\022\033\n"
-    "\027MATCHED_RESULT_TEAM_NUM\020\002\022\031\n\025MATCHED_RE"
-    "SULT_TEAM_L\020\000\022\031\n\025MATCHED_RESULT_TEAM_R\020\001"
-    "\022*\n%MACTCHING_BUCKET_MAX_WAITING_TEAM_NU"
-    "M\020\350\007\022#\n\035MATCHING_QUEUE_MAX_OBJECT_NUM\020\240\302"
-    "\036\032\002\020\001", 1445);
+    "T_NUM\022\027\n\017fetched_results\030\006 \001(\r\"]\n\010Matchi"
+    "ng\022\031\n\001q\030\001 \001(\0132\016.MatchingQueue\022\031\n\002mt\030\002 \001("
+    "\0132\r.MatchingTeam\022\033\n\002mo\030\003 \001(\0132\017.MatchingO"
+    "bject*\246\003\n\023MatchingConstValues\022 \n\034MATCHIN"
+    "G_TEAM_MAX_MEMBER_NUM\020\003\0220\n,MATCHING_TEAM"
+    "_MAX_WAITING_MERGING_MEMBER_NUM\020\002\022#\n\036MAT"
+    "CHING_TEAM_MAX_NUM_IN_LEVEL\020\220N\022!\n\035MACTCH"
+    "ING_QUEUE_MAX_LEVEL_NUM\020\032\022\035\n\031MACTCHING_Q"
+    "UEUE_MAX_LEVEL\020\031\022,\n\'MACTCHING_QUEUE_MAX_"
+    "MACTCHED_RESULT_NUM\020\220N\022\033\n\027MATCHED_RESULT"
+    "_TEAM_NUM\020\002\022\031\n\025MATCHED_RESULT_TEAM_L\020\000\022\031"
+    "\n\025MATCHED_RESULT_TEAM_R\020\001\022*\n%MACTCHING_B"
+    "UCKET_MAX_WAITING_TEAM_NUM\020\350\007\022#\n\035MATCHIN"
+    "G_QUEUE_MAX_OBJECT_NUM\020\240\302\036\032\002\020\001", 1470);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "matching.proto", &protobuf_RegisterTypes);
   MatchingPoint::default_instance_ = new MatchingPoint();
@@ -2208,6 +2209,7 @@ const int MatchingQueue::kBucketsFieldNumber;
 const int MatchingQueue::kCurTimeFieldNumber;
 const int MatchingQueue::kCurMsInsecFieldNumber;
 const int MatchingQueue::kResultsFieldNumber;
+const int MatchingQueue::kFetchedResultsFieldNumber;
 #endif  // !_MSC_VER
 
 MatchingQueue::MatchingQueue()
@@ -2231,6 +2233,7 @@ void MatchingQueue::SharedCtor() {
   team_member_num_ = 0u;
   cur_time_ = 0u;
   cur_ms_insec_ = 0u;
+  fetched_results_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2276,10 +2279,8 @@ void MatchingQueue::Clear() {
     ::memset(&first, 0, n);                                \
   } while (0)
 
-  if (_has_bits_[0 / 32] & 13) {
-    ZR_(team_member_num_, cur_time_);
-    cur_ms_insec_ = 0u;
-  }
+  ZR_(team_member_num_, cur_time_);
+  ZR_(cur_ms_insec_, fetched_results_);
 
 #undef OFFSET_OF_FIELD_
 #undef ZR_
@@ -2368,6 +2369,21 @@ bool MatchingQueue::MergePartialFromCodedStream(
           goto handle_unusual;
         }
         if (input->ExpectTag(42)) goto parse_results;
+        if (input->ExpectTag(48)) goto parse_fetched_results;
+        break;
+      }
+
+      // optional uint32 fetched_results = 6;
+      case 6: {
+        if (tag == 48) {
+         parse_fetched_results:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &fetched_results_)));
+          set_has_fetched_results();
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -2424,6 +2440,11 @@ void MatchingQueue::SerializeWithCachedSizes(
       5, this->results(i), output);
   }
 
+  // optional uint32 fetched_results = 6;
+  if (has_fetched_results()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->fetched_results(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -2463,6 +2484,11 @@ void MatchingQueue::SerializeWithCachedSizes(
         5, this->results(i), target);
   }
 
+  // optional uint32 fetched_results = 6;
+  if (has_fetched_results()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->fetched_results(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -2494,6 +2520,13 @@ int MatchingQueue::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->cur_ms_insec());
+    }
+
+    // optional uint32 fetched_results = 6;
+    if (has_fetched_results()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->fetched_results());
     }
 
   }
@@ -2550,6 +2583,9 @@ void MatchingQueue::MergeFrom(const MatchingQueue& from) {
     if (from.has_cur_ms_insec()) {
       set_cur_ms_insec(from.cur_ms_insec());
     }
+    if (from.has_fetched_results()) {
+      set_fetched_results(from.fetched_results());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -2580,6 +2616,7 @@ void MatchingQueue::Swap(MatchingQueue* other) {
     std::swap(cur_time_, other->cur_time_);
     std::swap(cur_ms_insec_, other->cur_ms_insec_);
     results_.Swap(&other->results_);
+    std::swap(fetched_results_, other->fetched_results_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

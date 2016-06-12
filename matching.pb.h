@@ -803,6 +803,13 @@ class MatchingQueue : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::MatchedResult >*
       mutable_results();
 
+  // optional uint32 fetched_results = 6;
+  inline bool has_fetched_results() const;
+  inline void clear_fetched_results();
+  static const int kFetchedResultsFieldNumber = 6;
+  inline ::google::protobuf::uint32 fetched_results() const;
+  inline void set_fetched_results(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:MatchingQueue)
  private:
   inline void set_has_team_member_num();
@@ -811,6 +818,8 @@ class MatchingQueue : public ::google::protobuf::Message {
   inline void clear_has_cur_time();
   inline void set_has_cur_ms_insec();
   inline void clear_has_cur_ms_insec();
+  inline void set_has_fetched_results();
+  inline void clear_has_fetched_results();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -821,6 +830,7 @@ class MatchingQueue : public ::google::protobuf::Message {
   ::google::protobuf::uint32 cur_time_;
   ::google::protobuf::RepeatedPtrField< ::MatchedResult > results_;
   ::google::protobuf::uint32 cur_ms_insec_;
+  ::google::protobuf::uint32 fetched_results_;
   friend void  protobuf_AddDesc_matching_2eproto();
   friend void protobuf_AssignDesc_matching_2eproto();
   friend void protobuf_ShutdownFile_matching_2eproto();
@@ -1474,6 +1484,30 @@ inline ::google::protobuf::RepeatedPtrField< ::MatchedResult >*
 MatchingQueue::mutable_results() {
   // @@protoc_insertion_point(field_mutable_list:MatchingQueue.results)
   return &results_;
+}
+
+// optional uint32 fetched_results = 6;
+inline bool MatchingQueue::has_fetched_results() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void MatchingQueue::set_has_fetched_results() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void MatchingQueue::clear_has_fetched_results() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void MatchingQueue::clear_fetched_results() {
+  fetched_results_ = 0u;
+  clear_has_fetched_results();
+}
+inline ::google::protobuf::uint32 MatchingQueue::fetched_results() const {
+  // @@protoc_insertion_point(field_get:MatchingQueue.fetched_results)
+  return fetched_results_;
+}
+inline void MatchingQueue::set_fetched_results(::google::protobuf::uint32 value) {
+  set_has_fetched_results();
+  fetched_results_ = value;
+  // @@protoc_insertion_point(field_set:MatchingQueue.fetched_results)
 }
 
 // -------------------------------------------------------------------
