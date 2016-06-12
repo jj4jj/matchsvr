@@ -108,7 +108,7 @@ struct string_t {
     }
 };
 
-template<size_t lmax, class LengthT=unsigned int>
+template<size_t lmax, class LengthT=int>
 struct bytes_t {
     unsigned char data[lmax];
     LengthT  length;
@@ -154,7 +154,7 @@ struct bytes_t {
     }
 };
 
-template<class T, size_t cmax, class LengthT=unsigned int>
+template<class T, size_t cmax, class LengthT=int>
 struct array_t {
     T list[cmax];
     LengthT count;
@@ -232,7 +232,7 @@ struct array_t {
             //list[cmax - 1].construct();
         }
         else {
-            memmove(list + idx, list + idx + 1, count - idx - 1);
+            memmove(list + idx, list + idx + 1, (count - idx - 1)*sizeof(T));
         }
         --count;
         return 0;

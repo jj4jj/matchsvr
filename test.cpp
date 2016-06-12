@@ -3,7 +3,16 @@
 #include "matching.cex.hpp"
 #include "matching.h"
 
-
+static inline int  _elo_to_level(int elo){
+    if (elo <= 500){
+        return 0;
+    }
+    if (elo >= 3000){
+        return MACTCHING_QUEUE_MAX_LEVEL;
+    }
+    //todo
+    return (elo - 600) / 100;
+}
 int main(){
 
     MatchingPool mq;
@@ -19,19 +28,22 @@ int main(){
         for (int j = 0; j < n; ++j){
             uint64_t role_id = ullNextEntID++;
             uint32_t elo = iPoint;
-            mq.update_matching_object(role_id, elo, rand() % 25 + 1);
+            mq.update_matching_object(role_id, elo, _elo_to_level(elo));// rand() % 25 + 1);
             members.push_back(role_id);
         }
-
-        if (rand() % 100 < 5){
-            //test exit
-            //mq.quit(ullNextEntID - 1);
-        }
-
         int ret = mq.join(members);
         if (ret){
             printf("ret join :%d \n", ret);
         }
+
+        if (rand() % 100 < 5){
+            //test exit
+            const MatchingTeam_ST * team = mq.quit(ullNextEntID - 1);
+            assert(team);
+            printf("quit team success role:%lu!\n", ullNextEntID - 1);
+            mq.free_team(team);
+        }
+
         mq.update(rand() % 100, rand() % 100);
         if (i % 5 == 0){
             int n = rand() % 20;
@@ -39,13 +51,25 @@ int main(){
             for (int j = 0; j < n; ++j){
                 const MatchingTeam_ST * lt = mq.get_team(r[j].teams[0]);
                 const MatchingTeam_ST * rt = mq.get_team(r[j].teams[1]);
-
                 printf("Got an pair ! [%d\t%d\tin\t%d]  <->  [%d\t%d\tin\t%d] \n",
                     lt->point.elo, lt->point.level, mq.time() - lt->join_time,
                     rt->point.elo, rt->point.level, mq.time() - rt->join_time);
             }
             mq.clear_fetched_results();
         }
+        if (false && rand() % 100 < 10){
+            //test exit
+            const MatchingTeam_ST * team = mq.quit(ullNextEntID - 1);
+            if (team){
+                printf("quit team success role:%lu!\n", ullNextEntID - 1);
+                mq.free_team(team);
+            }
+            else {
+                printf("quit team fail role:%lu!\n", ullNextEntID - 1);
+            }
+        }
+
+
     }
     return 0;
 }

@@ -57,8 +57,12 @@ int     MatchingPool::update_matching_object(uint64_t id, int elo, int lv){
     }
     return -1;
 }
-static inline size_t find_team_id_by_member_id(uint64_t id){
-
+static inline size_t find_team_id_by_member_id(uint64_t member_id){
+    auto it = s_ENV.member_id_2_team_id.find(member_id);
+    if (it != s_ENV.member_id_2_team_id.end()){
+        return it->second;
+    }
+    return 0;
 }
 #define MQ  (impl_->queue)
 int     MatchingPool::init(int team_member_num){
@@ -67,6 +71,7 @@ int     MatchingPool::init(int team_member_num){
     impl_->queue.construct();
     impl_->queue.team_member_num = team_member_num;
     impl_->queue.cur_time = ::time(NULL);
+    MQ.buckets.count = MACTCHING_QUEUE_MAX_LEVEL_NUM;
     for (int i = 0; i < MACTCHING_QUEUE_MAX_LEVEL_NUM; ++i){
         MQ.buckets[i].waitings.count = MATCHING_TEAM_MAX_WAITING_MERGING_MEMBER_NUM;
         for (int j = 0; j < MQ.buckets[i].waitings.count; ++j){
@@ -93,7 +98,7 @@ static inline void _elo_team_init(MatchingTeam_ST & t){
     size_t elo_product = 1;
     size_t lv_product = 1;
     for (int i = 0; i < t.members.count; ++i){
-        k.id = t.members.list[i];
+        k.id = t.members[i];
         MatchingObject_ST * pObj = s_ENV.matching_object_pool.find(k);
         assert(pObj);
         elo_product *= pObj->point.elo;
@@ -117,7 +122,7 @@ static inline int  _elo_to_level(int elo){
         return 0;
     }
     if (elo >= 3000){
-        return MACTCHING_QUEUE_MAX_LEVEL - 1;
+        return MACTCHING_QUEUE_MAX_LEVEL;
     }
     //todo
     return (elo - 600) / 100;
@@ -133,7 +138,7 @@ static inline bool _check_team_waiting_can_merged(uint32_t cur_time, const Match
     }
     return false;
 }
-static inline bool _check_result_matched(uint32_t cur_time, MatchingQueueMatcher_ST results[]){
+static inline bool _check_result_matched(uint32_t cur_time, MatchingQueueMatcher_ST results[MATCHED_RESULT_TEAM_NUM]){
     MatchingTeam_ST * lt = s_ENV.matching_team_pool.ptr(results[MATCHED_RESULT_TEAM_L].team_id);
     MatchingTeam_ST * rt = s_ENV.matching_team_pool.ptr(results[MATCHED_RESULT_TEAM_R].team_id);
     assert(lt && rt);
@@ -147,6 +152,107 @@ static inline bool _check_result_matched(uint32_t cur_time, MatchingQueueMatcher
         return true;
     }
     return false;
+}
+static inline void _check_merge_team(MatchingPoolImpl * impl_){
+    MatchingTeam_ST merged;
+    merged.construct();
+    size_t merged_buckets_num = 0;
+    struct {
+        int level;
+        int num_idx;
+        int pos_idx;
+    } merged_bucket_idxs[MATCHING_TEAM_MAX_MEMBER_NUM];
+    //check merging all
+    for (int level = MACTCHING_QUEUE_MAX_LEVEL; level >= 0; --level){
+        MatchingBucket_ST &    mqbucket = MQ.buckets[level];
+        for (int wq_nmem = MQ.team_member_num - 1; wq_nmem > 0; --wq_nmem){ //member number max -> min [N-1 => 1]
+            int nmem_idx = wq_nmem - 1;
+            MatchingWaitigTeam_ST & wmt = mqbucket.waitings[nmem_idx];
+            for (int k = wmt.teams.count - 1; k >= 0; --k){
+                //team can join  check ?
+                if (merged_buckets_num > 0 && !_check_team_waiting_can_merged(MQ.cur_time, merged, wmt.teams[k])){
+                    continue;
+                }
+                if (merged.members.count + wq_nmem <= MQ.team_member_num){
+                    //merge team
+                    merged_bucket_idxs[merged_buckets_num].level = level;
+                    merged_bucket_idxs[merged_buckets_num].num_idx = nmem_idx;
+                    merged_bucket_idxs[merged_buckets_num].pos_idx = k;
+                    ++merged_buckets_num;
+                    ///////////////////////////////////////////////////////
+                    if (merged.members.count == 0){
+                        merged.point.elo = wmt.teams[k].team_elo;
+                        merged.point.level = level;
+                        merged.members.count = wq_nmem;
+                    }
+                    else {
+                        merged.point.elo = sqrt(merged.point.elo * wmt.teams[k].team_elo);
+                        merged.point.level = sqrt(merged.point.level * level);
+                        merged.members.count += wq_nmem;
+                    }
+                }
+                //found one
+                if (merged.members.count == MQ.team_member_num){
+                    printf("found one merge matching team with %d teams [%d]\n",
+                        merged_buckets_num, merged.point.elo);
+                    MatchingBucket_ST & merge_bucket = MQ.buckets[merged.point.level];
+                    if (merge_bucket.matchers.count >= MATCHING_TEAM_MAX_NUM_IN_LEVEL){
+                        memset(&merged, 0, sizeof(merged));
+                        merged_buckets_num = 0;
+                        continue; //matching queueu is full
+                    }
+                    //new matcher
+                    MatchingQueueMatcher_ST nmqst;
+                    nmqst.construct();
+                    nmqst.team_elo = merged.point.elo;
+                    MatchingTeam_ST * nmerging_team = NULL;
+                    printf("clear merged %d teams\n", merged_buckets_num);
+                    //clear merged
+                    for (size_t x = 0; x < merged_buckets_num; ++x){
+                        MatchingBucket_ST & clear_bucket = MQ.buckets[merged_bucket_idxs[x].level];
+                        MatchingWaitigTeam_ST & clear_wq = clear_bucket.waitings[merged_bucket_idxs[x].num_idx];
+                        size_t clear_team_id = clear_wq.teams[merged_bucket_idxs[x].pos_idx].team_id;
+                        MatchingTeam_ST *  clear_team = s_ENV.matching_team_pool.ptr(clear_team_id);
+                        assert(clear_team);
+                        if (x == 0){
+                            nmqst.team_id = clear_team_id;
+                            nmerging_team = clear_team;
+                            nmerging_team->join_time = MQ.cur_time;
+                            nmerging_team->point = merged.point;
+                        }
+                        else {
+                            memcpy(nmerging_team->members.list + nmerging_team->members.count,
+                                clear_team->members.list,
+                                clear_team->members.count*sizeof(clear_team->members[0]));
+                            nmerging_team->members.count += clear_team->members.count;
+                            for (size_t x = 0; x < clear_team->members.count; ++x){ //update team map
+                                s_ENV.member_id_2_team_id[clear_team->members[x]] = nmqst.team_id;
+                            }
+                            //free team, update team id ?
+                            printf("free no:%d team:%u\n", __LINE__, clear_team_id);
+                            s_ENV.matching_team_pool.free(clear_team_id);
+                        }
+                        //here no idx change when removing for pos idx is reversed
+                        //when in same nidx (member num) , it's safe
+                        printf("before remove waiting queue x=%d [wq count=%d]\n", x,
+                            clear_wq.teams.count);
+                        clear_wq.teams.lremove(merged_bucket_idxs[x].pos_idx);
+                        printf("after remove waiting queue x=%d "
+                            "level=%d num=%d pos=%d [wq count=%d]\n", x,
+                            merged_bucket_idxs[x].level,
+                            merged_bucket_idxs[x].num_idx + 1,
+                            merged_bucket_idxs[x].pos_idx,
+                            clear_wq.teams.count);
+                    }
+                    //clear merged temp
+                    memset(&merged, 0, sizeof(merged));
+                    merged_buckets_num = 0;
+                    //insert as a total team (recursively merging)
+                    merge_bucket.matchers.binsert(nmqst);
+                }
+            }
+        }
+    }
 }
 int     MatchingPool::join(const std::vector<uint64_t> & members){
     //ADD TEAM
@@ -167,134 +273,61 @@ int     MatchingPool::join(const std::vector<uint64_t> & members){
     }
     *s_ENV.matching_team_pool.ptr(mtid) = mt;
 
-    int iMatchLv = mt.point.level;
-    MatchingBucket_ST & bucket = MQ.buckets.list[iMatchLv];
+    int matching_lv = mt.point.level;
+    MatchingBucket_ST & bucket = MQ.buckets[matching_lv];
 
     MatchingQueueMatcher_ST mqst;
     mqst.construct();
     mqst.team_elo = mt.point.elo;
     mqst.team_id = mtid;
 
-    printf("join matching team %d#[%d %d]\n", mt.members.count, iMatchLv, mt.point.elo);
+    printf("join matching team %zu#%d[%d %d] (", mtid,  mt.members.count, matching_lv, mt.point.elo);
+    for (int x = 0; x < mt.members.count; ++x){
+        printf("%lu,", mt.members[x]);
+    }
+    printf(")\n");
+
+
     if (mt.members.count == MQ.team_member_num){
         //insert into matchers
         if (bucket.matchers.count >= MATCHING_TEAM_MAX_NUM_IN_LEVEL){
+            printf("free no:%d team:%u\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -3;
         }
         if (bucket.matchers.binsert(mqst)){
+            printf("free no:%d team:%u\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -4;
         }
         for (size_t x = 0; x < mt.members.count; ++x){
-            s_ENV.member_id_2_team_id[mt.members.list[x]] = mtid;
+            s_ENV.member_id_2_team_id[mt.members[x]] = mtid;
         }
     }
     else {//waiting merging
         if (bucket.waitings[mt.members.count - 1].teams.count == MACTCHING_BUCKET_MAX_WAITING_TEAM_NUM){
+            printf("free no:%d team:%u\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -5; //waiting queue is also full
         }
         if (bucket.waitings[mt.members.count - 1].teams.binsert(mqst)){
+            printf("free no:%d team:%u\n", __LINE__, mtid);
             s_ENV.matching_team_pool.free(mtid);
             return -6;
         }
         for (size_t x = 0; x < mt.members.count; ++x){
-            s_ENV.member_id_2_team_id[mt.members.list[x]] = mtid;
+            s_ENV.member_id_2_team_id[mt.members[x]] = mtid;
         }
     }
-    //merging
-    MatchingTeam_ST merged;
-    merged.construct();
-    size_t merged_buckets_num = 0;
-    struct {
-        int level;
-        int num_idx;
-        int pos_idx;
-    } merged_bucket_idxs[MATCHING_TEAM_MAX_NUM_IN_LEVEL];
-    //check merging all
-    for (int i = MACTCHING_QUEUE_MAX_LEVEL; i >= 0; --i){
-        MatchingBucket_ST &    mqbucket = MQ.buckets.list[i];
-        for (int j = MQ.team_member_num - 1; j > 0; --j){ //member number max -> min
-            int nidx = j - 1;
-            MatchingWaitigTeam_ST & wmt = mqbucket.waitings.list[nidx];
-            for (int k = wmt.teams.count - 1; k >= 0; --k){
-                //team can join  check ?
-                if (merged_buckets_num > 0 && !_check_team_waiting_can_merged(MQ.cur_time, merged, wmt.teams.list[k])){
-                    continue;
-                }
-                if (merged.members.count + j <= MQ.team_member_num){
-                    //merge team
-                    merged_bucket_idxs[merged_buckets_num].level = i;
-                    merged_bucket_idxs[merged_buckets_num].num_idx = nidx;
-                    merged_bucket_idxs[merged_buckets_num].pos_idx = k;
-                    ++merged_buckets_num;
-                    ///////////////////////////////////////////////////////
-                    if (merged.members.count == 0){
-                        merged.point.elo = wmt.teams.list[k].team_elo;
-                        merged.members.count = j;
-                    }
-                    else {
-                        merged.point.elo = sqrt(merged.point.elo * wmt.teams.list[k].team_elo);
-                        merged.members.count += j;
-                    }
-                }
-                //found one
-                if (merged.members.count == MQ.team_member_num){
-                    printf("found one merge matching team with %d teams [%d]\n",
-                        merged_buckets_num, merged.point.elo);
-                    int elo_level = _elo_to_level(merged.point.elo);
-                    MatchingBucket_ST & merge_bucket = MQ.buckets.list[elo_level];
-                    if (merge_bucket.matchers.count >= MATCHING_TEAM_MAX_NUM_IN_LEVEL){
-                        memset(&merged, 0, sizeof(merged));
-                        merged_buckets_num = 0;
-                        continue;
-                    }
-
-                    MatchingQueueMatcher_ST nmqst;
-                    nmqst.construct();
-                    nmqst.team_elo = merged.point.elo;
-                    MatchingTeam_ST * nmerging_team = NULL;
-                    printf("clear merged \n");
-                    //clear merged
-                    for (size_t x = 0; x < merged_buckets_num; ++x){
-                        MatchingBucket_ST & clear_bucket = MQ.buckets.list[merged_bucket_idxs[x].level];
-                        size_t clear_team_id = clear_bucket.waitings.list[merged_bucket_idxs[x].num_idx].\
-                            teams.list[merged_bucket_idxs[x].pos_idx].team_id;
-                        MatchingTeam_ST *  clear_team = s_ENV.matching_team_pool.ptr(clear_team_id);
-                        if (x == 0){
-                            nmqst.team_id = clear_team_id;
-                            nmerging_team = clear_team;
-                            nmerging_team->join_time = MQ.cur_time;
-                            nmerging_team->point = merged.point;
-                        }
-                        else {
-                            memcpy(nmerging_team->members.list + nmerging_team->members.count,
-                                clear_team->members.list,
-                                clear_team->members.count*sizeof(clear_team->members.list[0]));
-                            nmerging_team->members.count += clear_team->members.count;
-                            for (size_t x = 0; x < mt.members.count; ++x){
-                                s_ENV.member_id_2_team_id[mt.members.list[x]] = mtid;
-                            }
-                            //free team, update team id ?
-                            s_ENV.matching_team_pool.free(clear_team_id);
-                        }
-                        clear_bucket.waitings.list[merged_bucket_idxs[x].num_idx].\
-                            teams.lremove(merged_bucket_idxs[x].pos_idx);
-                    }
-                    //insert as a total team (recursively merging)
-                    merge_bucket.matchers.binsert(nmqst);
-                }
-            }
-        }
-    }
+    _check_merge_team(impl_);
     return 0;
 }
 static inline void _free_team(size_t team_id){
     MatchingTeam_ST * team = s_ENV.matching_team_pool.ptr(team_id);
     for (int k = 0; k < team->members.count; ++k){
-        s_ENV.member_id_2_team_id.erase(team->members.list[k]);
+        s_ENV.member_id_2_team_id.erase(team->members[k]);
     }
+    printf("free no:%d team:%u\n", __LINE__, team_id);
     s_ENV.matching_team_pool.free(team_id);
 }
 const MatchingTeam_ST *  MatchingPool::get_team(size_t team_id){
@@ -306,9 +339,6 @@ void                 MatchingPool::free_team(const MatchingTeam_ST * team){
     _free_team(team_id);
 }
 const MatchingTeam_ST *    MatchingPool::quit(uint64_t member_id){
-    if (MATCHED_RESULT_TEAM_NUM > MQ.results.count){
-        this->update(0, 500);//update for matched result fastly
-    }
     size_t team_id = find_team_id_by_member_id(member_id);
     if (!team_id){ //not found
         return NULL;
@@ -322,120 +352,136 @@ const MatchingTeam_ST *    MatchingPool::quit(uint64_t member_id){
     mqms.construct();
     mqms.team_elo = ptr_team->point.elo;
     mqms.team_id = team_id;
-    int fid =  bucket.waitings.list[ptr_team->members.count-1].teams.lfind(mqms);
-    if (fid >= 0){
-        for (int i = fid; i < bucket.waitings.list[ptr_team->members.count - 1].teams.count; ++i){
-            if (bucket.waitings.list[ptr_team->members.count - 1].teams.list[i].team_id == team_id){
-                bucket.waitings.list[ptr_team->members.count - 1].teams.lremove(i);
-                return ptr_team;
+    if (ptr_team->members.count < MQ.team_member_num){
+        int inm = ptr_team->members.count - 1;
+        int fid = bucket.waitings[inm].teams.bfind(mqms);
+        if (fid >= 0){
+            for (int i = fid; i < bucket.waitings[inm].teams.count; ++i){
+                if (bucket.waitings[inm].teams[i].team_id == team_id){
+                    bucket.waitings[inm].teams.lremove(i);
+                    return ptr_team;
+                }
             }
         }
+        assert(false);
     }
-    fid = bucket.matchers.lfind(mqms);
-    if (fid >= 0){
-        for (int i = fid; i < bucket.matchers.count; ++i){
-            if (bucket.matchers.list[i].team_id == team_id){
-                bucket.matchers.lremove(i);
-                return ptr_team;
+    else {
+        int fid = bucket.matchers.bfind(mqms);
+        if (fid >= 0){
+            for (int i = fid; i < bucket.matchers.count; ++i){
+                if (bucket.matchers[i].team_id == team_id){
+                    bucket.matchers.lremove(i);
+                    return ptr_team;
+                }
             }
         }
+        //should be in result queue
+        return NULL;
     }
-    //result no should exit
-    return NULL;
 }
 uint32_t MatchingPool::time() const {
     return MQ.cur_time;
 }
-int     MatchingPool::update(int past_ms, int checked_num){
+int     MatchingPool::update(int past_ms, int max_checked_num){
     MQ.cur_ms_insec += past_ms;
     if (MQ.cur_ms_insec >= 1000){
         MQ.cur_time += MQ.cur_ms_insec / 1000;
         MQ.cur_ms_insec %= 1000;
     }
     //matching
-    int iResultAvail = MACTCHING_QUEUE_MAX_MACTCHED_RESULT_NUM - MQ.results.count;
-    int iCheckedNum = 0;
+    int result_avail = MACTCHING_QUEUE_MAX_MACTCHED_RESULT_NUM - MQ.results.count;
+    int checked_num = 0;
     for (int i = 0; i <= MACTCHING_QUEUE_MAX_LEVEL; ++i){
         MatchingBucket_ST &    bucket = MQ.buckets[i];
         MatchedResult_ST *     result = &MQ.results.list[MQ.results.count];
         result->teams.count = MATCHED_RESULT_TEAM_NUM;
-        for (int j = bucket.matchers.count - 1; j >= 1 && iResultAvail > 0; j -= 2){
+        for (int j = bucket.matchers.count - 1; j >= 1 && result_avail > 0; j -= 2){
             result->teams[MATCHED_RESULT_TEAM_L] = bucket.matchers[j].team_id;
             result->teams[MATCHED_RESULT_TEAM_R] = bucket.matchers[j - 1].team_id;
-            printf("same level:%d num:%d matched : j=%d j+1=%d [%d] <-> [%d]\n", i,
-                bucket.matchers.count, j, j - 1,
-                bucket.matchers[j].team_elo,
-                bucket.matchers[j - 1].team_elo);
+            printf("same level:%d num:%d matched : [%d:%d] <-> [%d:%d]\n", i,
+                bucket.matchers.count,
+                bucket.matchers[j].team_id, bucket.matchers[j].team_elo,
+                bucket.matchers[j - 1].team_id, bucket.matchers[j - 1].team_elo);
 
             ++MQ.results.count;
-            --iResultAvail;
-            ++iCheckedNum;
+            --result_avail;
+            ++checked_num;
             bucket.matchers.count -= 2;
         }
     }
-    if (iCheckedNum >= checked_num){
-        return iCheckedNum;
+    if (checked_num >= max_checked_num){
+        return checked_num;
     }
     //check rest span a section
-    bool bMatching = false; //matching state
-    int  iLeftLv = -1;
+    bool matching = false; //matching state
+    int  left_level = -1;
     MatchingQueueMatcher_ST result_teams[MATCHED_RESULT_TEAM_NUM];
     memset(&result_teams, 0, sizeof(result_teams));
     for (int i = MACTCHING_QUEUE_MAX_LEVEL; i >= 0; --i){
         MatchingBucket_ST &    bucket = MQ.buckets[i];
         MatchedResult_ST *     result = &MQ.results.list[MQ.results.count];
-        if (bucket.matchers.count > 0 && iResultAvail > 0){
-            if (bMatching){ //
+        if (bucket.matchers.count > 0 && result_avail > 0 && checked_num < max_checked_num){
+            assert(bucket.matchers[0].team_id);
+            if (matching){ //
                 //checking
-                result_teams[MATCHED_RESULT_TEAM_R] = bucket.matchers.list[0];
+                result_teams[MATCHED_RESULT_TEAM_R] = bucket.matchers[0];
                 if (_check_result_matched(MQ.cur_time, result_teams)){
                     result->teams[MATCHED_RESULT_TEAM_L] = result_teams[MATCHED_RESULT_TEAM_L].team_id;
                     result->teams[MATCHED_RESULT_TEAM_R] = result_teams[MATCHED_RESULT_TEAM_R].team_id;
                     ++MQ.results.count;
 
-                    --iResultAvail;
-                    bMatching = false;
+                    --result_avail;
+                    matching = false;
+
+                    printf("span level diff:%d matched : [%d:%d] <-> [%d:%d]\n", i - left_level,
+                        result_teams[MATCHED_RESULT_TEAM_L].team_id, result_teams[MATCHED_RESULT_TEAM_L].team_elo,
+                        result_teams[MATCHED_RESULT_TEAM_R].team_id, result_teams[MATCHED_RESULT_TEAM_R].team_elo);
+
                     //remove
-                    assert(iLeftLv >= 0);
-                    assert(MQ.buckets.list[iLeftLv].matchers.count == 1);
-                    --MQ.buckets.list[iLeftLv].matchers.count;
+                    assert(left_level >= 0);
+                    assert(MQ.buckets[left_level].matchers.count == 1);
+                    --MQ.buckets[left_level].matchers.count;
 
                     assert(bucket.matchers.count == 1);
                     --bucket.matchers.count;
                     printf("found span pair ok , then find next pair ...\n");
                     //find next left
-                    i = iLeftLv;
-                    iLeftLv = -1;
+                    i = left_level;
+                    left_level = -1;
                 }
             }
             else {
-                result_teams[MATCHED_RESULT_TEAM_L] = bucket.matchers.list[0];
-                iLeftLv = i;
-                bMatching = true;
+                result_teams[MATCHED_RESULT_TEAM_L] = bucket.matchers[0];
+                left_level = i;
+                matching = true;
             }
         }
     }
-    return iCheckedNum;
+    return checked_num;
 }
 const MatchedResult_ST * MatchingPool::fetch_results(int * result_num){
-    assert(result_num);
+    assert(result_num );
+    if (*result_num <= 0){
+        return NULL;
+    }
     assert(MQ.results.count >= MQ.fetched_results);
-    if (*result_num + MQ.fetched_results > MQ.results.count){
+    if (*result_num + MQ.fetched_results > MQ.results.count){//cut
         *result_num = MQ.results.count - MQ.fetched_results;
     }
+    MatchedResult_ST * p = MQ.results.list + MQ.fetched_results;
     MQ.fetched_results += *result_num;
-    return MQ.results.list + MQ.fetched_results;
+    return p;
 }
 void                     MatchingPool::clear_fetched_results(){
     //free team
     for (uint32_t i = 0; i < MQ.fetched_results; ++i){
         for (int j = 0; j < MATCHED_RESULT_TEAM_NUM; ++j){
-            _free_team(MQ.results.list[i].teams[j]);
+            _free_team(MQ.results[i].teams[j]);
         }
     }
     if (MQ.results.count > MQ.fetched_results){
         memmove(MQ.results.list, MQ.results.list + MQ.fetched_results,
-            (MQ.results.count > MQ.fetched_results)*sizeof(MQ.results.list[0]));
+            (MQ.results.count - MQ.fetched_results)*sizeof(MQ.results[0]));
         MQ.results.count -= MQ.fetched_results;
     }
     else {

@@ -12,4 +12,5 @@ clean:
 	rm -f ./matching.pb.h
 
 test: ./matching.cpp ./test.cpp
-	g++ $^ -o $@ -g3 --std=c++11
+	g++ $^ -o $@ -g3 --std=c++11 -Wall
+

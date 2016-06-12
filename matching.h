@@ -6,8 +6,8 @@ class MatchedResult_ST;
 class MatchingTeam_ST;
 struct MatchingPoolImpl;
 struct MatchingPool {
-    int     init(int team_member_num);
-    int     update(int past_ms, int checked_num = 1000);
+    int         init(int team_member_num);
+    int         update(int past_ms, int checked_num = 1000);
     uint32_t    time() const;
     int                         join(const std::vector<uint64_t> & members);
     const MatchingTeam_ST *     quit(uint64_t member_id);
