@@ -36,7 +36,7 @@ int main(){
             printf("ret join :%d \n", ret);
         }
 
-        if (false && rand() % 100 < 5){
+        if (rand() % 100 < 5){
             //test exit
             const MatchingTeam_ST * team = mq.quit(ullNextEntID - 1);
             assert(team);

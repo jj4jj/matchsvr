@@ -142,13 +142,16 @@ static inline bool _check_result_matched(uint32_t cur_time, MatchingQueueMatcher
     MatchingTeam_ST * lt = s_ENV.matching_team_pool.ptr(results[MATCHED_RESULT_TEAM_L].team_id);
     MatchingTeam_ST * rt = s_ENV.matching_team_pool.ptr(results[MATCHED_RESULT_TEAM_R].team_id);
     assert(lt && rt);
-    int llv = _elo_to_level(results[MATCHED_RESULT_TEAM_L].team_elo);
-    int rlv = _elo_to_level(results[MATCHED_RESULT_TEAM_R].team_elo);
-
+    int llv = lt->point.level;// _elo_to_level(results[MATCHED_RESULT_TEAM_L].team_elo);
+    int rlv = rt->point.level;// _elo_to_level(results[MATCHED_RESULT_TEAM_R].team_elo);
     int wait_time = std::min(cur_time - lt->join_time, cur_time - rt->join_time);
     int lv_diff = llv - rlv;
     if (lv_diff < 0){ lv_diff = -lv_diff; }
     if (wait_time >= lv_diff * 15){
+        printf("check result matched success -> lv diff:%d wait min time:%d [%u: %u %u in time %u]<->[%u: %u %u in time %u]\n",
+            lv_diff, wait_time,
+            results[MATCHED_RESULT_TEAM_L].team_id, lt->point.elo, llv, cur_time - lt->join_time,
+            results[MATCHED_RESULT_TEAM_R].team_id, rt->point.elo, rlv, cur_time - rt->join_time);
         return true;
     }
     return false;
@@ -401,6 +404,7 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
         for (int j = bucket.matchers.count - 1; j >= 1 && result_avail > 0; j -= 2){
             result.teams[MATCHED_RESULT_TEAM_L] = bucket.matchers[j].team_id;
             result.teams[MATCHED_RESULT_TEAM_R] = bucket.matchers[j - 1].team_id;
+
             printf("same level:%d num:%u matched : [%u:%u] <-> [%u:%u]\n", i,
                 bucket.matchers.count,
                 bucket.matchers[j].team_id, bucket.matchers[j].team_elo,
@@ -435,15 +439,17 @@ int     MatchingPool::update(int past_ms, int max_checked_num){
                     MQ.results.lappend(result);
                     --result_avail;
                     matching = false;
+                    //
+                    printf("span level diff:%d matched : [%u:%u] <-> [%u:%u]\n", i - left_level,
+                        result_teams[MATCHED_RESULT_TEAM_L].team_id, result_teams[MATCHED_RESULT_TEAM_L].team_elo,
+                        result_teams[MATCHED_RESULT_TEAM_R].team_id, result_teams[MATCHED_RESULT_TEAM_R].team_elo);
+                    
+                    //clear team result
                     result.teams[MATCHED_RESULT_TEAM_L] = 0;
                     result.teams[MATCHED_RESULT_TEAM_R] = 0;
                     memset(&result_teams, 0, sizeof(result_teams));
 
-                    printf("span level diff:%d matched : [%u:%u] <-> [%u:%u]\n", i - left_level,
-                        result_teams[MATCHED_RESULT_TEAM_L].team_id, result_teams[MATCHED_RESULT_TEAM_L].team_elo,
-                        result_teams[MATCHED_RESULT_TEAM_R].team_id, result_teams[MATCHED_RESULT_TEAM_R].team_elo);
-
-                    //remove
+                    //remove index
                     assert(left_level >= 0);
                     assert(MQ.buckets[left_level].matchers.count == 1);
                     --MQ.buckets[left_level].matchers.count;
