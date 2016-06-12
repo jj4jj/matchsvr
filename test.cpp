@@ -36,7 +36,7 @@ int main(){
             printf("ret join :%d \n", ret);
         }
 
-        if (rand() % 100 < 5){
+        if (false && rand() % 100 < 5){
             //test exit
             const MatchingTeam_ST * team = mq.quit(ullNextEntID - 1);
             assert(team);
@@ -57,7 +57,7 @@ int main(){
             }
             mq.clear_fetched_results();
         }
-        if (false && rand() % 100 < 10){
+        if (rand() % 100 < 10){
             //test exit
             const MatchingTeam_ST * team = mq.quit(ullNextEntID - 1);
             if (team){
