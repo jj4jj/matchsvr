@@ -18,4 +18,12 @@ libmatcing.a: matching.cpp matching.cex.hpp matching.pb.h
 	g++ -c matching.cpp --std=c++11 -O2 ${protoi} -Wall
 	ar -rcs $@ matching.o
 
-install: test
+install: libmatcing.a test
+	mkdir -p lib
+	mv libmatcing.a lib/
+	mkdir -p bin
+	mv test  bin/
+	mkdir -p include
+	cp -f matching.h include/
+	cp -f matching.cex.hpp include/
+	cp -f pbdcex.core.hpp include/
