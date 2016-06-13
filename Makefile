@@ -1,29 +1,27 @@
-test: ./test.cpp libmatcing.a
-	g++ $^ -o $@ -g3 ${protoi} --std=c++11 -Wall
+PBDC_INCLUDE=../pbdcex/include
 
+test/test: test/test.cpp lib/libmatcing.a
+	g++ $^ -o $@ -g3 ${protoi} -I${PBDC_INCLUDE} -Iproto -Iinclude --std=c++11 -Wall
+	mkdir -p bin
+	mv test/test bin/
 
-matching.cex.hpp: ./matching.proto ./pbdcex.core.hxx
-	./pbdcexer -mMatching -pmatching.proto -I. ${protoi} --cpp_out=.
+proto/matching.cex.hpp: proto/matching.proto
+	./tools/pbdcexer -mMatching -pmatching.proto -Iproto -I${PBDC_INCLUDE} ${protoi} --cpp_out=proto
 
-matching.pb.h: ./matching.proto ./extensions.proto
-	${protoc} $^ --cpp_out=. ${protoi} -I.
+proto/matching.pb.h: proto/matching.proto ${PBDC_INCLUDE}/extensions.proto
+	${protoc} $^ --cpp_out=proto ${protoi} -Iproto -I${PBDC_INCLUDE}
 
 clean:
-	rm -f ./matching.cex.hpp
-	rm -f ./matching.pb.*
-	rm -f libmatcing.a
-	rm -f test
+	rm -rf lib/ bin/
+	rm -f proto/matching.cex.hpp
+	rm -f proto/matching.pb.*
 
-libmatcing.a: matching.cpp matching.cex.hpp matching.pb.h
-	g++ -c matching.cpp --std=c++11 -O2 ${protoi} -Wall
+libmatcing.a: src/matching.cpp proto/matching.cex.hpp proto/matching.pb.h
+	g++ -c src/matching.cpp --std=c++11 -O2 ${protoi} -Iproto -Wall -I${PBDC_INCLUDE}
 	ar -rcs $@ matching.o
-
+test: test/test
 install: libmatcing.a test
 	mkdir -p lib
 	mv libmatcing.a lib/
-	mkdir -p bin
-	mv test  bin/
 	mkdir -p include
-	cp -f matching.h include/
-	cp -f matching.cex.hpp include/
-	cp -f pbdcex.core.hpp include/
+	cp -f src/matching.h include/
