@@ -1,16 +1,21 @@
+test: ./test.cpp libmatcing.a
+	g++ $^ -o $@ -g3 ${protoi} --std=c++11 -Wall
 
-all: matching.pb.h matching.cex.hpp 
 
 matching.cex.hpp: ./matching.proto ./pbdcex.core.hxx
-	./pbdcexer -mMatching -pmatching.proto -I. -I/usr/local/include --cpp_out=.
+	./pbdcexer -mMatching -pmatching.proto -I. ${protoi} --cpp_out=.
 
 matching.pb.h: ./matching.proto ./extensions.proto
-	protoc $^ --cpp_out=. -I/usr/local/include -I.
+	${protoc} $^ --cpp_out=. ${protoi} -I.
 
 clean:
 	rm -f ./matching.cex.hpp
-	rm -f ./matching.pb.h
+	rm -f ./matching.pb.*
+	rm -f libmatcing.a
+	rm -f test
 
-test: ./matching.cpp ./test.cpp
-	g++ $^ -o $@ -g3 --std=c++11 -Wall
+libmatcing.a: matching.cpp matching.cex.hpp matching.pb.h
+	g++ -c matching.cpp --std=c++11 -O2 ${protoi} -Wall
+	ar -rcs $@ matching.o
 
+install: test

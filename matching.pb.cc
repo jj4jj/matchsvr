@@ -367,7 +367,6 @@ const int MatchingPoint::kLevelFieldNumber;
 MatchingPoint::MatchingPoint()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchingPoint)
 }
 
 void MatchingPoint::InitAsDefaultInstance() {
@@ -377,7 +376,6 @@ MatchingPoint::MatchingPoint(const MatchingPoint& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchingPoint)
 }
 
 void MatchingPoint::SharedCtor() {
@@ -388,7 +386,6 @@ void MatchingPoint::SharedCtor() {
 }
 
 MatchingPoint::~MatchingPoint() {
-  // @@protoc_insertion_point(destructor:MatchingPoint)
   SharedDtor();
 }
 
@@ -419,44 +416,30 @@ MatchingPoint* MatchingPoint::New() const {
 }
 
 void MatchingPoint::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<MatchingPoint*>(16)->f) - \
-   reinterpret_cast<char*>(16))
-
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
-
-  ZR_(elo_, level_);
-
-#undef OFFSET_OF_FIELD_
-#undef ZR_
-
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    elo_ = 0u;
+    level_ = 0u;
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
 bool MatchingPoint::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchingPoint)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required uint32 elo = 1;
       case 1: {
-        if (tag == 8) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &elo_)));
           set_has_elo();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(16)) goto parse_level;
         break;
@@ -464,25 +447,25 @@ bool MatchingPoint::MergePartialFromCodedStream(
 
       // optional uint32 level = 2;
       case 2: {
-        if (tag == 16) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_level:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &level_)));
           set_has_level();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -490,18 +473,12 @@ bool MatchingPoint::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchingPoint)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchingPoint)
-  return false;
 #undef DO_
 }
 
 void MatchingPoint::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchingPoint)
   // required uint32 elo = 1;
   if (has_elo()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->elo(), output);
@@ -516,12 +493,10 @@ void MatchingPoint::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchingPoint)
 }
 
 ::google::protobuf::uint8* MatchingPoint::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchingPoint)
   // required uint32 elo = 1;
   if (has_elo()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->elo(), target);
@@ -536,7 +511,6 @@ void MatchingPoint::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchingPoint)
   return target;
 }
 
@@ -642,7 +616,6 @@ const int MatchingObject::kPointFieldNumber;
 MatchingObject::MatchingObject()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchingObject)
 }
 
 void MatchingObject::InitAsDefaultInstance() {
@@ -653,7 +626,6 @@ MatchingObject::MatchingObject(const MatchingObject& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchingObject)
 }
 
 void MatchingObject::SharedCtor() {
@@ -664,7 +636,6 @@ void MatchingObject::SharedCtor() {
 }
 
 MatchingObject::~MatchingObject() {
-  // @@protoc_insertion_point(destructor:MatchingObject)
   SharedDtor();
 }
 
@@ -696,7 +667,7 @@ MatchingObject* MatchingObject::New() const {
 }
 
 void MatchingObject::Clear() {
-  if (_has_bits_[0 / 32] & 3) {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     id_ = GOOGLE_ULONGLONG(0);
     if (has_point()) {
       if (point_ != NULL) point_->::MatchingPoint::Clear();
@@ -708,23 +679,20 @@ void MatchingObject::Clear() {
 
 bool MatchingObject::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchingObject)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required uint64 id = 1;
       case 1: {
-        if (tag == 8) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
                  input, &id_)));
           set_has_id();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_point;
         break;
@@ -732,23 +700,23 @@ bool MatchingObject::MergePartialFromCodedStream(
 
       // required .MatchingPoint point = 2;
       case 2: {
-        if (tag == 18) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_point:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_point()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -756,18 +724,12 @@ bool MatchingObject::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchingObject)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchingObject)
-  return false;
 #undef DO_
 }
 
 void MatchingObject::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchingObject)
   // required uint64 id = 1;
   if (has_id()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->id(), output);
@@ -783,12 +745,10 @@ void MatchingObject::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchingObject)
 }
 
 ::google::protobuf::uint8* MatchingObject::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchingObject)
   // required uint64 id = 1;
   if (has_id()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->id(), target);
@@ -805,7 +765,6 @@ void MatchingObject::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchingObject)
   return target;
 }
 
@@ -915,7 +874,6 @@ const int MatchingTeam::kPointFieldNumber;
 MatchingTeam::MatchingTeam()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchingTeam)
 }
 
 void MatchingTeam::InitAsDefaultInstance() {
@@ -926,7 +884,6 @@ MatchingTeam::MatchingTeam(const MatchingTeam& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchingTeam)
 }
 
 void MatchingTeam::SharedCtor() {
@@ -937,7 +894,6 @@ void MatchingTeam::SharedCtor() {
 }
 
 MatchingTeam::~MatchingTeam() {
-  // @@protoc_insertion_point(destructor:MatchingTeam)
   SharedDtor();
 }
 
@@ -969,7 +925,7 @@ MatchingTeam* MatchingTeam::New() const {
 }
 
 void MatchingTeam::Clear() {
-  if (_has_bits_[0 / 32] & 6) {
+  if (_has_bits_[1 / 32] & (0xffu << (1 % 32))) {
     join_time_ = 0u;
     if (has_point()) {
       if (point_ != NULL) point_->::MatchingPoint::Clear();
@@ -982,27 +938,26 @@ void MatchingTeam::Clear() {
 
 bool MatchingTeam::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchingTeam)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // repeated uint64 members = 1;
       case 1: {
-        if (tag == 8) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_members:
           DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
                  1, 8, input, this->mutable_members())));
-        } else if (tag == 10) {
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
                  input, this->mutable_members())));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(8)) goto parse_members;
         if (input->ExpectTag(16)) goto parse_join_time;
@@ -1011,14 +966,15 @@ bool MatchingTeam::MergePartialFromCodedStream(
 
       // required uint32 join_time = 2;
       case 2: {
-        if (tag == 16) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_join_time:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &join_time_)));
           set_has_join_time();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(26)) goto parse_point;
         break;
@@ -1026,23 +982,23 @@ bool MatchingTeam::MergePartialFromCodedStream(
 
       // required .MatchingPoint point = 3;
       case 3: {
-        if (tag == 26) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_point:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_point()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1050,18 +1006,12 @@ bool MatchingTeam::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchingTeam)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchingTeam)
-  return false;
 #undef DO_
 }
 
 void MatchingTeam::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchingTeam)
   // repeated uint64 members = 1;
   for (int i = 0; i < this->members_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(
@@ -1083,12 +1033,10 @@ void MatchingTeam::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchingTeam)
 }
 
 ::google::protobuf::uint8* MatchingTeam::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchingTeam)
   // repeated uint64 members = 1;
   for (int i = 0; i < this->members_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -1111,7 +1059,6 @@ void MatchingTeam::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchingTeam)
   return target;
 }
 
@@ -1231,7 +1178,6 @@ const int MatchedResult::kTeamsFieldNumber;
 MatchedResult::MatchedResult()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchedResult)
 }
 
 void MatchedResult::InitAsDefaultInstance() {
@@ -1241,7 +1187,6 @@ MatchedResult::MatchedResult(const MatchedResult& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchedResult)
 }
 
 void MatchedResult::SharedCtor() {
@@ -1250,7 +1195,6 @@ void MatchedResult::SharedCtor() {
 }
 
 MatchedResult::~MatchedResult() {
-  // @@protoc_insertion_point(destructor:MatchedResult)
   SharedDtor();
 }
 
@@ -1288,39 +1232,37 @@ void MatchedResult::Clear() {
 
 bool MatchedResult::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchedResult)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // repeated uint64 teams = 1;
       case 1: {
-        if (tag == 8) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_teams:
           DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
                  1, 8, input, this->mutable_teams())));
-        } else if (tag == 10) {
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
                  input, this->mutable_teams())));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(8)) goto parse_teams;
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1328,18 +1270,12 @@ bool MatchedResult::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchedResult)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchedResult)
-  return false;
 #undef DO_
 }
 
 void MatchedResult::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchedResult)
   // repeated uint64 teams = 1;
   for (int i = 0; i < this->teams_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt64(
@@ -1350,12 +1286,10 @@ void MatchedResult::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchedResult)
 }
 
 ::google::protobuf::uint8* MatchedResult::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchedResult)
   // repeated uint64 teams = 1;
   for (int i = 0; i < this->teams_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -1366,7 +1300,6 @@ void MatchedResult::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchedResult)
   return target;
 }
 
@@ -1457,7 +1390,6 @@ const int MatchingQueueMatcher::kTeamIdFieldNumber;
 MatchingQueueMatcher::MatchingQueueMatcher()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchingQueueMatcher)
 }
 
 void MatchingQueueMatcher::InitAsDefaultInstance() {
@@ -1467,7 +1399,6 @@ MatchingQueueMatcher::MatchingQueueMatcher(const MatchingQueueMatcher& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchingQueueMatcher)
 }
 
 void MatchingQueueMatcher::SharedCtor() {
@@ -1478,7 +1409,6 @@ void MatchingQueueMatcher::SharedCtor() {
 }
 
 MatchingQueueMatcher::~MatchingQueueMatcher() {
-  // @@protoc_insertion_point(destructor:MatchingQueueMatcher)
   SharedDtor();
 }
 
@@ -1509,44 +1439,30 @@ MatchingQueueMatcher* MatchingQueueMatcher::New() const {
 }
 
 void MatchingQueueMatcher::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<MatchingQueueMatcher*>(16)->f) - \
-   reinterpret_cast<char*>(16))
-
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
-
-  ZR_(team_elo_, team_id_);
-
-#undef OFFSET_OF_FIELD_
-#undef ZR_
-
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    team_elo_ = 0u;
+    team_id_ = 0u;
+  }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
 
 bool MatchingQueueMatcher::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchingQueueMatcher)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required uint32 team_elo = 1;
       case 1: {
-        if (tag == 8) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &team_elo_)));
           set_has_team_elo();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(16)) goto parse_team_id;
         break;
@@ -1554,25 +1470,25 @@ bool MatchingQueueMatcher::MergePartialFromCodedStream(
 
       // required uint32 team_id = 2;
       case 2: {
-        if (tag == 16) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_team_id:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &team_id_)));
           set_has_team_id();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1580,18 +1496,12 @@ bool MatchingQueueMatcher::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchingQueueMatcher)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchingQueueMatcher)
-  return false;
 #undef DO_
 }
 
 void MatchingQueueMatcher::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchingQueueMatcher)
   // required uint32 team_elo = 1;
   if (has_team_elo()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->team_elo(), output);
@@ -1606,12 +1516,10 @@ void MatchingQueueMatcher::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchingQueueMatcher)
 }
 
 ::google::protobuf::uint8* MatchingQueueMatcher::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchingQueueMatcher)
   // required uint32 team_elo = 1;
   if (has_team_elo()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->team_elo(), target);
@@ -1626,7 +1534,6 @@ void MatchingQueueMatcher::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchingQueueMatcher)
   return target;
 }
 
@@ -1731,7 +1638,6 @@ const int MatchingWaitigTeam::kTeamsFieldNumber;
 MatchingWaitigTeam::MatchingWaitigTeam()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchingWaitigTeam)
 }
 
 void MatchingWaitigTeam::InitAsDefaultInstance() {
@@ -1741,7 +1647,6 @@ MatchingWaitigTeam::MatchingWaitigTeam(const MatchingWaitigTeam& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchingWaitigTeam)
 }
 
 void MatchingWaitigTeam::SharedCtor() {
@@ -1750,7 +1655,6 @@ void MatchingWaitigTeam::SharedCtor() {
 }
 
 MatchingWaitigTeam::~MatchingWaitigTeam() {
-  // @@protoc_insertion_point(destructor:MatchingWaitigTeam)
   SharedDtor();
 }
 
@@ -1788,34 +1692,30 @@ void MatchingWaitigTeam::Clear() {
 
 bool MatchingWaitigTeam::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchingWaitigTeam)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // repeated .MatchingQueueMatcher teams = 1;
       case 1: {
-        if (tag == 10) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_teams:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_teams()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(10)) goto parse_teams;
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1823,18 +1723,12 @@ bool MatchingWaitigTeam::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchingWaitigTeam)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchingWaitigTeam)
-  return false;
 #undef DO_
 }
 
 void MatchingWaitigTeam::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchingWaitigTeam)
   // repeated .MatchingQueueMatcher teams = 1;
   for (int i = 0; i < this->teams_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -1845,12 +1739,10 @@ void MatchingWaitigTeam::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchingWaitigTeam)
 }
 
 ::google::protobuf::uint8* MatchingWaitigTeam::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchingWaitigTeam)
   // repeated .MatchingQueueMatcher teams = 1;
   for (int i = 0; i < this->teams_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -1862,7 +1754,6 @@ void MatchingWaitigTeam::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchingWaitigTeam)
   return target;
 }
 
@@ -1920,7 +1811,9 @@ void MatchingWaitigTeam::CopyFrom(const MatchingWaitigTeam& from) {
 
 bool MatchingWaitigTeam::IsInitialized() const {
 
-  if (!::google::protobuf::internal::AllAreInitialized(this->teams())) return false;
+  for (int i = 0; i < teams_size(); i++) {
+    if (!this->teams(i).IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -1952,7 +1845,6 @@ const int MatchingBucket::kMatchersFieldNumber;
 MatchingBucket::MatchingBucket()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchingBucket)
 }
 
 void MatchingBucket::InitAsDefaultInstance() {
@@ -1962,7 +1854,6 @@ MatchingBucket::MatchingBucket(const MatchingBucket& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchingBucket)
 }
 
 void MatchingBucket::SharedCtor() {
@@ -1971,7 +1862,6 @@ void MatchingBucket::SharedCtor() {
 }
 
 MatchingBucket::~MatchingBucket() {
-  // @@protoc_insertion_point(destructor:MatchingBucket)
   SharedDtor();
 }
 
@@ -2010,22 +1900,19 @@ void MatchingBucket::Clear() {
 
 bool MatchingBucket::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchingBucket)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // repeated .MatchingWaitigTeam waitings = 1;
       case 1: {
-        if (tag == 10) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_waitings:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_waitings()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(10)) goto parse_waitings;
         if (input->ExpectTag(18)) goto parse_matchers;
@@ -2034,24 +1921,24 @@ bool MatchingBucket::MergePartialFromCodedStream(
 
       // repeated .MatchingQueueMatcher matchers = 2;
       case 2: {
-        if (tag == 18) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_matchers:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_matchers()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_matchers;
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2059,18 +1946,12 @@ bool MatchingBucket::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchingBucket)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchingBucket)
-  return false;
 #undef DO_
 }
 
 void MatchingBucket::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchingBucket)
   // repeated .MatchingWaitigTeam waitings = 1;
   for (int i = 0; i < this->waitings_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -2087,12 +1968,10 @@ void MatchingBucket::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchingBucket)
 }
 
 ::google::protobuf::uint8* MatchingBucket::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchingBucket)
   // repeated .MatchingWaitigTeam waitings = 1;
   for (int i = 0; i < this->waitings_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -2111,7 +1990,6 @@ void MatchingBucket::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchingBucket)
   return target;
 }
 
@@ -2178,8 +2056,12 @@ void MatchingBucket::CopyFrom(const MatchingBucket& from) {
 
 bool MatchingBucket::IsInitialized() const {
 
-  if (!::google::protobuf::internal::AllAreInitialized(this->waitings())) return false;
-  if (!::google::protobuf::internal::AllAreInitialized(this->matchers())) return false;
+  for (int i = 0; i < waitings_size(); i++) {
+    if (!this->waitings(i).IsInitialized()) return false;
+  }
+  for (int i = 0; i < matchers_size(); i++) {
+    if (!this->matchers(i).IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -2216,7 +2098,6 @@ const int MatchingQueue::kFetchedResultsFieldNumber;
 MatchingQueue::MatchingQueue()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:MatchingQueue)
 }
 
 void MatchingQueue::InitAsDefaultInstance() {
@@ -2226,7 +2107,6 @@ MatchingQueue::MatchingQueue(const MatchingQueue& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:MatchingQueue)
 }
 
 void MatchingQueue::SharedCtor() {
@@ -2239,7 +2119,6 @@ void MatchingQueue::SharedCtor() {
 }
 
 MatchingQueue::~MatchingQueue() {
-  // @@protoc_insertion_point(destructor:MatchingQueue)
   SharedDtor();
 }
 
@@ -2270,22 +2149,12 @@ MatchingQueue* MatchingQueue::New() const {
 }
 
 void MatchingQueue::Clear() {
-#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
-  &reinterpret_cast<MatchingQueue*>(16)->f) - \
-   reinterpret_cast<char*>(16))
-
-#define ZR_(first, last) do {                              \
-    size_t f = OFFSET_OF_FIELD_(first);                    \
-    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
-    ::memset(&first, 0, n);                                \
-  } while (0)
-
-  ZR_(team_member_num_, cur_time_);
-  ZR_(cur_ms_insec_, fetched_results_);
-
-#undef OFFSET_OF_FIELD_
-#undef ZR_
-
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    team_member_num_ = 0u;
+    cur_time_ = 0u;
+    cur_ms_insec_ = 0u;
+    fetched_results_ = 0u;
+  }
   buckets_.Clear();
   results_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -2294,23 +2163,20 @@ void MatchingQueue::Clear() {
 
 bool MatchingQueue::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:MatchingQueue)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required uint32 team_member_num = 1;
       case 1: {
-        if (tag == 8) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &team_member_num_)));
           set_has_team_member_num();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_buckets;
         break;
@@ -2318,12 +2184,13 @@ bool MatchingQueue::MergePartialFromCodedStream(
 
       // repeated .MatchingBucket buckets = 2;
       case 2: {
-        if (tag == 18) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_buckets:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_buckets()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_buckets;
         if (input->ExpectTag(24)) goto parse_cur_time;
@@ -2332,14 +2199,15 @@ bool MatchingQueue::MergePartialFromCodedStream(
 
       // required uint32 cur_time = 3;
       case 3: {
-        if (tag == 24) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_cur_time:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &cur_time_)));
           set_has_cur_time();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(32)) goto parse_cur_ms_insec;
         break;
@@ -2347,14 +2215,15 @@ bool MatchingQueue::MergePartialFromCodedStream(
 
       // required uint32 cur_ms_insec = 4;
       case 4: {
-        if (tag == 32) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_cur_ms_insec:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &cur_ms_insec_)));
           set_has_cur_ms_insec();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(42)) goto parse_results;
         break;
@@ -2362,12 +2231,13 @@ bool MatchingQueue::MergePartialFromCodedStream(
 
       // repeated .MatchedResult results = 5;
       case 5: {
-        if (tag == 42) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_results:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_results()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(42)) goto parse_results;
         if (input->ExpectTag(48)) goto parse_fetched_results;
@@ -2376,25 +2246,25 @@ bool MatchingQueue::MergePartialFromCodedStream(
 
       // optional uint32 fetched_results = 6;
       case 6: {
-        if (tag == 48) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_fetched_results:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &fetched_results_)));
           set_has_fetched_results();
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2402,18 +2272,12 @@ bool MatchingQueue::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:MatchingQueue)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:MatchingQueue)
-  return false;
 #undef DO_
 }
 
 void MatchingQueue::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:MatchingQueue)
   // required uint32 team_member_num = 1;
   if (has_team_member_num()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->team_member_num(), output);
@@ -2450,12 +2314,10 @@ void MatchingQueue::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:MatchingQueue)
 }
 
 ::google::protobuf::uint8* MatchingQueue::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MatchingQueue)
   // required uint32 team_member_num = 1;
   if (has_team_member_num()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->team_member_num(), target);
@@ -2494,7 +2356,6 @@ void MatchingQueue::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:MatchingQueue)
   return target;
 }
 
@@ -2606,7 +2467,9 @@ void MatchingQueue::CopyFrom(const MatchingQueue& from) {
 bool MatchingQueue::IsInitialized() const {
   if ((_has_bits_[0] & 0x0000000d) != 0x0000000d) return false;
 
-  if (!::google::protobuf::internal::AllAreInitialized(this->buckets())) return false;
+  for (int i = 0; i < buckets_size(); i++) {
+    if (!this->buckets(i).IsInitialized()) return false;
+  }
   return true;
 }
 
@@ -2644,7 +2507,6 @@ const int Matching::kMoFieldNumber;
 Matching::Matching()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:Matching)
 }
 
 void Matching::InitAsDefaultInstance() {
@@ -2657,7 +2519,6 @@ Matching::Matching(const Matching& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:Matching)
 }
 
 void Matching::SharedCtor() {
@@ -2669,7 +2530,6 @@ void Matching::SharedCtor() {
 }
 
 Matching::~Matching() {
-  // @@protoc_insertion_point(destructor:Matching)
   SharedDtor();
 }
 
@@ -2703,7 +2563,7 @@ Matching* Matching::New() const {
 }
 
 void Matching::Clear() {
-  if (_has_bits_[0 / 32] & 7) {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (has_q()) {
       if (q_ != NULL) q_->::MatchingQueue::Clear();
     }
@@ -2720,21 +2580,18 @@ void Matching::Clear() {
 
 bool Matching::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:Matching)
-  for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
-    tag = p.first;
-    if (!p.second) goto handle_unusual;
+  while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // optional .MatchingQueue q = 1;
       case 1: {
-        if (tag == 10) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_q()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(18)) goto parse_mt;
         break;
@@ -2742,12 +2599,13 @@ bool Matching::MergePartialFromCodedStream(
 
       // optional .MatchingTeam mt = 2;
       case 2: {
-        if (tag == 18) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_mt:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_mt()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
         if (input->ExpectTag(26)) goto parse_mo;
         break;
@@ -2755,23 +2613,23 @@ bool Matching::MergePartialFromCodedStream(
 
       // optional .MatchingObject mo = 3;
       case 3: {
-        if (tag == 26) {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_mo:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_mo()));
         } else {
-          goto handle_unusual;
+          goto handle_uninterpreted;
         }
-        if (input->ExpectAtEnd()) goto success;
+        if (input->ExpectAtEnd()) return true;
         break;
       }
 
       default: {
-      handle_unusual:
-        if (tag == 0 ||
-            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          goto success;
+          return true;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2779,18 +2637,12 @@ bool Matching::MergePartialFromCodedStream(
       }
     }
   }
-success:
-  // @@protoc_insertion_point(parse_success:Matching)
   return true;
-failure:
-  // @@protoc_insertion_point(parse_failure:Matching)
-  return false;
 #undef DO_
 }
 
 void Matching::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:Matching)
   // optional .MatchingQueue q = 1;
   if (has_q()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -2813,12 +2665,10 @@ void Matching::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:Matching)
 }
 
 ::google::protobuf::uint8* Matching::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Matching)
   // optional .MatchingQueue q = 1;
   if (has_q()) {
     target = ::google::protobuf::internal::WireFormatLite::
@@ -2844,7 +2694,6 @@ void Matching::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Matching)
   return target;
 }
 
