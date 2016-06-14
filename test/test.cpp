@@ -27,11 +27,11 @@ int main(){
         members.clear();
         for (int j = 0; j < n; ++j){
             uint64_t role_id = ullNextEntID++;
-            uint32_t elo = iPoint;
-            mq.update_matching_object(role_id, elo, _elo_to_level(elo));// rand() % 25 + 1);
+            //uint32_t elo = iPoint;
+            //mq.update_matching_object(role_id, elo, _elo_to_level(elo));// rand() % 25 + 1);
             members.push_back(role_id);
         }
-        int ret = mq.join(members);
+        int ret = mq.join(members, iPoint);
         if (ret){
             printf("ret join :%d \n", ret);
         }
@@ -50,12 +50,12 @@ int main(){
             const MatchedResult_ST * r = mq.fetch_results(&n);
             printf("fetched result num:%zu\n", n);
             for (size_t j = 0; j < n; ++j){
-                printf("process result pair ! %zu <-> %zu\n", 
+                printf("process result pair ! %u <-> %u\n", 
                     r[j].teams[0],
                     r[j].teams[1]);
                 const MatchingTeam_ST * lt = mq.get_team(r[j].teams[0]);
                 const MatchingTeam_ST * rt = mq.get_team(r[j].teams[1]);
-                printf("process result pair ! %zu#[%d\t%d\tin\t%d]  <->  %zu#[%d\t%d\tin\t%d] \n",
+                printf("process result pair ! %u#[%d\t%d\tin\t%d]  <->  %u#[%d\t%d\tin\t%d] \n",
                     r[j].teams[0],
                     lt->point.elo, lt->point.level, mq.time() - lt->join_time,
                     r[j].teams[1],

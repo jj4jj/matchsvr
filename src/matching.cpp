@@ -10,8 +10,8 @@
 static struct MatchingEnv {
     pbdcex::mmpool_t<MatchingTeam_ST, MATCHING_QUEUE_MAX_OBJECT_NUM>
         matching_team_pool;
-    pbdcex::hashtable_t<MatchingObject_ST, MATCHING_QUEUE_MAX_OBJECT_NUM>
-        matching_object_pool;
+    //pbdcex::hashtable_t<MatchingObject_ST, MATCHING_QUEUE_MAX_OBJECT_NUM>
+    //    matching_object_pool;
     int     inited;
     std::unordered_map<uint64_t, size_t>    member_id_2_team_id;
     MatchingEnv():inited(false){
@@ -20,7 +20,6 @@ static struct MatchingEnv {
 
 static inline void matching_service_init(){
     if (!s_ENV.inited){
-        s_ENV.matching_object_pool.construct();
         s_ENV.matching_team_pool.construct();
     }
 }
@@ -38,6 +37,7 @@ MatchingPool::~MatchingPool(){
         impl_ = NULL;
     }
 }
+#if 0
 int     MatchingPool::update_matching_object(uint64_t id, int elo, int lv){
     MatchingObject_ST mo;
     mo.construct();
@@ -54,6 +54,7 @@ int     MatchingPool::update_matching_object(uint64_t id, int elo, int lv){
     }
     return -1;
 }
+#endif
 static inline size_t find_team_id_by_member_id(uint64_t member_id){
     auto it = s_ENV.member_id_2_team_id.find(member_id);
     if (it != s_ENV.member_id_2_team_id.end()){
@@ -77,6 +78,7 @@ int     MatchingPool::init(int team_member_num){
     }
     return 0;
 }
+#if 0
 static inline void _elo_team_init(MatchingTeam_ST & t){
     int point_add_extra_percent = 0;
     switch (t.members.count){
@@ -114,6 +116,7 @@ static inline void _elo_team_init(MatchingTeam_ST & t){
         t.point.elo /= 100;
     }
 }
+#endif
 static inline int  _elo_to_level(int elo){
     if (elo <= 500){
         return 0;
@@ -254,7 +257,12 @@ static inline void _check_merge_team(MatchingPoolImpl * impl_){
         }
     }
 }
-int     MatchingPool::join(const std::vector<uint64_t> & members){
+int     MatchingPool::join(uint64_t member_id, int elo, int lv){
+    std::vector<uint64_t> vi;
+    vi.push_back(member_id);
+    return join(vi, elo, lv);
+}
+int     MatchingPool::join(const std::vector<uint64_t> & members, int elo , int lv){
     //ADD TEAM
     if (members.size() > MQ.team_member_num &&
         members.size() == 0){
@@ -266,7 +274,13 @@ int     MatchingPool::join(const std::vector<uint64_t> & members){
     for (size_t i = 0; i < members.size(); ++i){
         mt.members.lappend(members[i]);
     }
-    _elo_team_init(mt);
+    mt.point.elo = elo;
+    if (lv == 0){
+        mt.point.level = _elo_to_level(elo);
+    }
+    else {
+        mt.point.level = lv;
+    }
     size_t mtid = s_ENV.matching_team_pool.alloc();
     if (!mtid){
         return -2;

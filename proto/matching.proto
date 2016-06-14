@@ -21,18 +21,20 @@ message MatchingPoint {
 	required	uint32	elo = 1;
 	optional	uint32	level = 2;
 };
+/*
 message MatchingObject {
 	option(m_pks) = "id";
 	required	uint64			id = 1;
 	required	MatchingPoint	point = 2;
 };
+*/
 message MatchingTeam {
 	repeated	uint64	members = 1[(f_count)="MATCHING_TEAM_MAX_MEMBER_NUM"];
 	required	uint32	join_time = 2;
 	required	MatchingPoint	point = 3;
 };
 message MatchedResult {
-	repeated	uint64	teams = 1[(f_count)="MATCHED_RESULT_TEAM_NUM"];
+	repeated	uint32	teams = 1[(f_count)="MATCHED_RESULT_TEAM_NUM"];
 };
 message MatchingQueueMatcher {
 	option(m_pks) = "team_elo,team_id";
@@ -58,7 +60,6 @@ message MatchingQueue {
 message Matching {
 	optional MatchingQueue q = 1;
 	optional MatchingTeam  mt = 2;
-	optional MatchingObject mo = 3;
 }
 
 
